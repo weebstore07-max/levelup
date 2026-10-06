@@ -210,9 +210,10 @@ ALTER TABLE public.users ADD COLUMN IF NOT EXISTS freeze_passes INTEGER DEFAULT 
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS freeze_pass_activated BOOLEAN DEFAULT FALSE;
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS last_frozen_date DATE NULL;
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS last_freeze_used_date DATE NULL;
+ALTER TABLE public.users ADD COLUMN IF NOT EXISTS freeze_challenge_started_at TIMESTAMPTZ DEFAULT NOW();
 
 -- Atomic RPC to award a Freeze Pass (capped at 1, blocked if already holding or activated)
-CREATE OR REPLACE FUNCTION public.award_freeze_pass(p_user_id UUID)
+CREATE OR REPLACE FUNCTION public.award_freeze_pass(p_user_id UUID, p_now TIMESTAMPTZ DEFAULT NOW())
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -228,6 +229,7 @@ BEGIN
 
   UPDATE public.users
   SET freeze_passes = 1,
+      freeze_challenge_started_at = COALESCE(p_now, NOW()),
       updated_at = NOW()
   WHERE id = p_user_id 
     AND (freeze_passes IS NULL OR freeze_passes < 1)
@@ -241,8 +243,8 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.award_freeze_pass(UUID) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.award_freeze_pass(UUID) TO authenticated;
+REVOKE ALL ON FUNCTION public.award_freeze_pass(UUID, TIMESTAMPTZ) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.award_freeze_pass(UUID, TIMESTAMPTZ) TO authenticated;
 
 -- Atomic RPC to manually activate a Freeze Pass
 CREATE OR REPLACE FUNCTION public.activate_freeze_pass(p_user_id UUID, p_current_date DATE DEFAULT CURRENT_DATE)

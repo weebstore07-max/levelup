@@ -66,7 +66,7 @@ export const FreezeChallengeModal: React.FC<FreezeChallengeModalProps> = ({
               <span>❄️</span> Hard Freeze Challenge
             </h3>
             <p className="text-xs text-on-surface-variant mt-1">
-              Complete today's 4 targets on the same local date to earn a Freeze Pass.
+              Complete the 4 targets to earn a Freeze Pass.
             </p>
           </div>
           <button

@@ -14,10 +14,91 @@ export const isDateInCurrentMonth = (dateStr?: string | null): boolean => {
   return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
 };
 
+export const getChallengeProgress = async (
+  userId: string,
+  userProfile: UserProfile | null,
+  progressList: LessonProgress[] = [],
+  sessionsList: StudySession[] = []
+): Promise<{ lessons: number; minutes: number; xp: number; sessions: number; cycleStartStr: string }> => {
+  const validUserId = toUuid(userId);
+  const cycleStartStr = userProfile?.freeze_challenge_started_at || userProfile?.created_at || new Date().toISOString();
+  const cycleStart = new Date(cycleStartStr);
+
+  // 1. Qualifying completed lessons during current challenge cycle (10 XP each)
+  const cycleLessonsList = progressList.filter(p => {
+    if (!p.completed || !p.completed_at) return false;
+    const compDate = new Date(p.completed_at);
+    return !isNaN(compDate.getTime()) && compDate >= cycleStart;
+  });
+  const lessons = cycleLessonsList.length;
+  const lessonXp = lessons * 10;
+
+  // 2. Qualifying study sessions & study minutes during current challenge cycle
+  const cycleSessionsList = sessionsList.filter(s => {
+    const dateStr = s.created_at || (s.session_date ? `${s.session_date}T00:00:00` : null);
+    if (!dateStr) return false;
+    const sessDate = new Date(dateStr);
+    return !isNaN(sessDate.getTime()) && sessDate >= cycleStart;
+  });
+  const sessions = cycleSessionsList.length;
+  const minutes = cycleSessionsList.reduce((acc, s) => acc + (Number(s.duration_minutes) || 0), 0);
+  const sessionXp = cycleSessionsList.reduce((acc, s) => acc + (Number(s.xp_earned) || 0), 0);
+
+  // 3. Qualifying completed TODOs during current challenge cycle (10 / 20 / 30 XP)
+  let todoXp = 0;
+  try {
+    const { data: todosData } = await supabase
+      .from('todos')
+      .select('completed, priority, created_at')
+      .eq('user_id', validUserId)
+      .eq('completed', true);
+
+    if (todosData && todosData.length > 0) {
+      const XP_MAP: Record<string, number> = { high: 30, medium: 20, low: 10 };
+      todoXp = todosData
+        .filter(t => {
+          if (!t.created_at) return false;
+          const cDate = new Date(t.created_at);
+          return !isNaN(cDate.getTime()) && cDate >= cycleStart;
+        })
+        .reduce((sum, t) => sum + (XP_MAP[t.priority] || 10), 0);
+    }
+  } catch (err) {
+    console.warn('Error fetching todo XP for challenge:', err);
+  }
+
+  // 4. Qualifying unlocked achievements during current challenge cycle
+  let achievementXp = 0;
+  try {
+    const { data: uAch } = await supabase
+      .from('user_achievements')
+      .select('unlocked, unlocked_at, achievement_id, achievements(title, xp_reward)')
+      .eq('user_id', validUserId)
+      .eq('unlocked', true);
+
+    if (uAch && uAch.length > 0) {
+      achievementXp = uAch
+        .filter(ua => {
+          if (!ua.unlocked_at) return false;
+          const uDate = new Date(ua.unlocked_at);
+          return !isNaN(uDate.getTime()) && uDate >= cycleStart;
+        })
+        .reduce((sum, ua: any) => sum + (ua.achievements?.xp_reward || 0), 0);
+    }
+  } catch (err) {
+    console.warn('Error fetching achievement XP for challenge:', err);
+  }
+
+  // Total Real LevelUp XP accrued in current cycle
+  const xp = lessonXp + todoXp + achievementXp + sessionXp;
+
+  return { lessons, minutes, xp, sessions, cycleStartStr };
+};
+
 export const freezePassService = {
   /**
-   * Check whether today's activity satisfies the Hard Freeze Challenge:
-   * 10 completed lessons + 120 minutes + 150 XP + 3 separate study sessions on the same local calendar date.
+   * Check whether persistent challenge activity satisfies the Hard Freeze Challenge:
+   * 10 completed lessons + 120 minutes + 150 XP + 3 separate study sessions accrued during the current challenge cycle.
    * Max 1 stored Freeze Pass.
    */
   async checkAndAwardFreezePass(
@@ -43,39 +124,26 @@ export const freezePassService = {
 
     const promise = (async () => {
       try {
-        const todayKey = formatDateKey(new Date());
+        let activeProfile = userProfile;
+        if (!activeProfile?.freeze_challenge_started_at) {
+          // Initialize challenge cycle start for user if missing to prevent auto-granting past activity
+          const nowIso = new Date().toISOString();
+          const updated = await usersService.update(validUserId, { freeze_challenge_started_at: nowIso });
+          if (updated) {
+            activeProfile = updated;
+          }
+        }
 
-        // 1. Count completed lessons on today's local date
-        const lessonsToday = progressList.filter(p => {
-          if (!p.completed || !p.completed_at) return false;
-          return formatDateKey(new Date(p.completed_at)) === todayKey;
-        }).length;
+        const { lessons, minutes, xp, sessions } = await getChallengeProgress(validUserId, activeProfile, progressList, sessionsList);
 
-        // 2. Filter study sessions on today's local date
-        const todaySessionsList = sessionsList.filter(s => {
-          if (!s.session_date) return false;
-          return s.session_date.split('T')[0] === todayKey;
-        });
-
-        const sessionsToday = todaySessionsList.length;
-
-        // 3. Sum study session minutes on today's local date
-        const minutesToday = todaySessionsList.reduce((acc, s) => {
-          return acc + (Number(s.duration_minutes) || 0);
-        }, 0);
-
-        // 4. Calculate today's XP: study session xp_earned + (lessonsToday * 50)
-        const sessionXpToday = todaySessionsList.reduce((acc, s) => {
-          return acc + (Number(s.xp_earned) || 0);
-        }, 0);
-        const xpToday = sessionXpToday + (lessonsToday * 50);
-
-        if (lessonsToday >= 10 && minutesToday >= 120 && xpToday >= 150 && sessionsToday >= 3) {
+        if (lessons >= 10 && minutes >= 120 && xp >= 150 && sessions >= 3) {
           let awarded = false;
+          const newCycleNow = new Date().toISOString();
 
-          // Primary atomic database operation: Supabase RPC
+          // Primary atomic database operation: Supabase RPC (sets freeze_passes = 1 AND resets freeze_challenge_started_at)
           const { data: rpcResult, error: rpcError } = await supabase.rpc('award_freeze_pass', {
-            p_user_id: validUserId
+            p_user_id: validUserId,
+            p_now: newCycleNow
           });
 
           if (!rpcError && rpcResult === true) {
@@ -84,7 +152,10 @@ export const freezePassService = {
             // Fallback atomic client update if RPC is missing/unavailable
             const freshUser = await usersService.getById(validUserId);
             if ((freshUser?.freeze_passes ?? 0) < 1 && !freshUser?.freeze_pass_activated) {
-              const updated = await usersService.update(validUserId, { freeze_passes: 1 });
+              const updated = await usersService.update(validUserId, {
+                freeze_passes: 1,
+                freeze_challenge_started_at: newCycleNow
+              });
               if (updated && updated.freeze_passes === 1) {
                 awarded = true;
               }
@@ -96,7 +167,7 @@ export const freezePassService = {
             await notificationsService.create({
               user_id: validUserId,
               title: 'Freeze Pass Earned',
-              message: 'Freeze Pass Earned! You completed today\'s challenge.',
+              message: 'Freeze Pass Earned! You completed the Hard Freeze Challenge.',
               type: 'system',
               is_read: false
             });

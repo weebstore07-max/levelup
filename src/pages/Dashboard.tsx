@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageLayout } from '../components/layout/PageLayout';
 import { useAuth } from '../context/AuthContext';
-import { coursesService, lessonsService, lessonProgressService, todosService, studySessionsService, usersService, notificationsService, calculateStreak, formatDateKey, getSortedLessons, mergeLessonsWithProgress, freezePassService, isDateInCurrentMonth, CATEGORY_COLORS, CourseCategory } from '../services';
+import { coursesService, lessonsService, lessonProgressService, todosService, studySessionsService, usersService, notificationsService, calculateStreak, formatDateKey, getSortedLessons, mergeLessonsWithProgress, freezePassService, getChallengeProgress, isDateInCurrentMonth, CATEGORY_COLORS, CourseCategory } from '../services';
 import { Course, Lesson, LessonProgress, TodoItem, StudySession, MergedLesson } from '../types';
 import { supabase } from '../lib/supabase';
 import { FreezeChallengeModal } from '../components/FreezeChallengeModal';
@@ -23,6 +23,12 @@ export const Dashboard: React.FC = () => {
   const [isActivatingFreezePass, setIsActivatingFreezePass] = useState(false);
   const [expandedCourseId, setExpandedCourseId] = useState<string | null>(null);
   const [streakDays, setStreakDays] = useState<number>(userProfile?.streak_days || 0);
+  const [challengeProgressData, setChallengeProgressData] = useState<{ lessons: number; minutes: number; xp: number; sessions: number }>({
+    lessons: 0,
+    minutes: 0,
+    xp: 0,
+    sessions: 0
+  });
 
   useEffect(() => {
     fetchDashboardData();
@@ -87,6 +93,10 @@ export const Dashboard: React.FC = () => {
           userProfile
         );
         setStreakDays(computedStreak);
+
+        // 6. Compute real persistent challenge progress asynchronously
+        const cProg = await getChallengeProgress(currentUser.uid, userProfile, progressData, sessionsData || []);
+        setChallengeProgressData(cProg);
     } catch (err) {
       console.warn('Dashboard fetch error:', err);
     } finally {
@@ -107,28 +117,11 @@ export const Dashboard: React.FC = () => {
   const calculatedLevel = Math.floor(calculatedXp / 200) + 1;
   const levelTitle = calculatedXp < 200 ? 'Beginner' : calculatedXp < 500 ? 'Explorer' : calculatedXp < 1000 ? 'Scholar' : 'Master';
 
-  // Freeze Pass challenge calculations (4-part Hard Freeze Challenge)
-  const todayKey = formatDateKey(new Date());
-
-  const todayLessons = progressList.filter(p => {
-    if (!p.completed || !p.completed_at) return false;
-    return formatDateKey(new Date(p.completed_at)) === todayKey;
-  }).length;
-
-  const todaySessionsList = studySessions.filter(s => {
-    if (!s.session_date) return false;
-    return s.session_date.split('T')[0] === todayKey;
-  });
-  const todaySessions = todaySessionsList.length;
-
-  const todayMinutes = todaySessionsList.reduce((sum, s) => {
-    return sum + (Number(s.duration_minutes) || 0);
-  }, 0);
-
-  const sessionXpToday = todaySessionsList.reduce((sum, s) => {
-    return sum + (Number(s.xp_earned) || 0);
-  }, 0);
-  const todayXp = sessionXpToday + (todayLessons * 50);
+  // Freeze Pass challenge calculations (Persistent Hard Freeze Challenge)
+  const todayLessons = challengeProgressData.lessons;
+  const todayMinutes = challengeProgressData.minutes;
+  const todayXp = challengeProgressData.xp;
+  const todaySessions = challengeProgressData.sessions;
 
   const isChallengeComplete =
     todayLessons >= 10 &&

@@ -122,6 +122,7 @@ export const usersService = {
     if (updates.freeze_pass_activated !== undefined) payload.freeze_pass_activated = updates.freeze_pass_activated;
     if (updates.last_frozen_date !== undefined) payload.last_frozen_date = updates.last_frozen_date;
     if (updates.last_freeze_used_date !== undefined) payload.last_freeze_used_date = updates.last_freeze_used_date;
+    if (updates.freeze_challenge_started_at !== undefined) payload.freeze_challenge_started_at = updates.freeze_challenge_started_at;
     if (updates.daily_goal_minutes !== undefined) payload.daily_goal_minutes = updates.daily_goal_minutes;
 
     if (typeof updates.streak_days === 'number') {

@@ -15,6 +15,7 @@ export interface UserProfile {
   freeze_pass_activated?: boolean;
   last_frozen_date?: string | null;
   last_freeze_used_date?: string | null;
+  freeze_challenge_started_at?: string | null;
   daily_goal_minutes: number;
   created_at?: string;
   updated_at?: string;
