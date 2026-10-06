@@ -6,7 +6,6 @@ import { StudySession, LessonProgress, Course, Lesson, UserProfile } from '../ty
 
 export const Analytics: React.FC = () => {
   const { userProfile, currentUser } = useAuth();
-  const [timeframe, setTimeframe] = useState('Last 7 Days');
   const [studySessions, setStudySessions] = useState<StudySession[]>([]);
   const [lessonProgress, setLessonProgress] = useState<LessonProgress[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
@@ -249,26 +248,12 @@ export const Analytics: React.FC = () => {
     <PageLayout>
       <div className="flex flex-col gap-8">
         {/* Page Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start gap-4 px-container-padding">
+        <div className="px-container-padding">
           <div>
             <h2 className="font-display-lg text-display-lg mb-2 text-primary">Analytics</h2>
             <p className="font-body-md text-body-md text-on-surface-variant">
               Review your learning patterns and track progress over time.
             </p>
-          </div>
-          {/* Date Range Selector */}
-          <div className="flex items-center gap-2 rounded-lg bg-surface-container-lowest border card-border px-3 py-1.5 shadow-sm">
-            <span className="material-symbols-outlined text-on-surface-variant text-[20px]">calendar_today</span>
-            <select 
-              value={timeframe}
-              onChange={(e) => setTimeframe(e.target.value)}
-              className="bg-transparent border-none text-body-md font-body-md focus:ring-0 p-0 pr-6 text-on-surface cursor-pointer outline-none"
-            >
-              <option>Last 7 Days</option>
-              <option>Last 30 Days</option>
-              <option>This Year</option>
-              <option>All Time</option>
-            </select>
           </div>
         </div>
 
