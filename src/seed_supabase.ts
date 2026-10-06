@@ -1,8 +1,20 @@
 import { createClient } from '@supabase/supabase-js';
 
-const rawUrl = 'https://ztezgtpuxjwmxcllecsv.supabase.co/rest/v1/';
+declare const process: any;
+
+const getEnvVar = (key: string): string => {
+  if (typeof process !== 'undefined' && process.env && process.env[key]) {
+    return process.env[key]!;
+  }
+  if (typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env[key]) {
+    return (import.meta as any).env[key];
+  }
+  return '';
+};
+
+const rawUrl = getEnvVar('VITE_SUPABASE_URL') || getEnvVar('SUPABASE_URL') || 'https://xyzcompany.supabase.co';
 const supabaseUrl = rawUrl.replace(/\/rest\/v1\/?$/, '').replace(/\/$/, '');
-const supabaseAnonKey = 'sb_publishable_L9SZNwCjhtPZ7zCTcd20wg_ulJp0PKF';
+const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY') || getEnvVar('SUPABASE_ANON_KEY') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy_anon_key';
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
