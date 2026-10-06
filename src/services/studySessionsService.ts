@@ -5,6 +5,10 @@ import { toUuid } from './lessonProgressService';
 export const studySessionsService = {
   async getByUserId(userId: string): Promise<StudySession[]> {
     const validUserId = toUuid(userId);
+
+    // Auto-sync any missing study sessions for completed lessons before returning
+    await this.syncMissingLessonSessions(validUserId);
+
     const { data, error } = await supabase
       .from('study_sessions')
       .select('*')
@@ -18,8 +22,97 @@ export const studySessionsService = {
     return data as StudySession[];
   },
 
+  async syncMissingLessonSessions(userId: string): Promise<void> {
+    try {
+      const validUserId = toUuid(userId);
+
+      // 1. Fetch completed lesson progress records for user
+      const { data: progress } = await supabase
+        .from('lesson_progress')
+        .select('lesson_id, completed, completed_at')
+        .eq('user_id', validUserId)
+        .eq('completed', true);
+
+      if (!progress || progress.length === 0) return;
+
+      // 2. Fetch existing study sessions for user
+      const { data: existingSessions } = await supabase
+        .from('study_sessions')
+        .select('*')
+        .eq('user_id', validUserId);
+
+      const sessions = existingSessions || [];
+
+      // Set of lesson_ids that already have a study_session linked
+      const linkedLessonIds = new Set<string>();
+      sessions.forEach(s => {
+        if (s.lesson_id) linkedLessonIds.add(s.lesson_id);
+      });
+
+      // Collect unlinked study sessions (without lesson_id)
+      const unlinkedSessions = [...sessions.filter(s => !s.lesson_id)];
+
+      // 3. Fetch lesson durations for completed lessons
+      const completedLessonIds = progress.map(p => p.lesson_id);
+      const { data: lessonsData } = await supabase
+        .from('lessons')
+        .select('id, duration_minutes')
+        .in('id', completedLessonIds);
+
+      const lessonDurationMap = new Map<string, number>();
+      (lessonsData || []).forEach(l => {
+        lessonDurationMap.set(l.id, Number(l.duration_minutes) || 1);
+      });
+
+      const missingSessionsToInsert: any[] = [];
+
+      for (const p of progress) {
+        if (linkedLessonIds.has(p.lesson_id)) continue;
+
+        const dur = lessonDurationMap.get(p.lesson_id) || 1;
+        const sessionDate = p.completed_at
+          ? p.completed_at.split('T')[0]
+          : new Date().toISOString().split('T')[0];
+
+        // Check if an unlinked session exists matching date & duration
+        const matchIndex = unlinkedSessions.findIndex(
+          s => (s.session_date === sessionDate || (s.created_at && s.created_at.split('T')[0] === sessionDate)) &&
+               Number(s.duration_minutes) === dur
+        );
+
+        if (matchIndex !== -1) {
+          // Link existing unlinked session to this lesson_id
+          const matchedSession = unlinkedSessions.splice(matchIndex, 1)[0];
+          linkedLessonIds.add(p.lesson_id);
+          await supabase
+            .from('study_sessions')
+            .update({ lesson_id: p.lesson_id })
+            .eq('id', matchedSession.id);
+        } else {
+          // Reconstruct missing study session
+          missingSessionsToInsert.push({
+            id: crypto.randomUUID(),
+            user_id: validUserId,
+            lesson_id: p.lesson_id,
+            duration_minutes: dur,
+            xp_earned: 0,
+            session_date: sessionDate
+          });
+          linkedLessonIds.add(p.lesson_id);
+        }
+      }
+
+      if (missingSessionsToInsert.length > 0) {
+        await supabase.from('study_sessions').insert(missingSessionsToInsert);
+      }
+    } catch (err) {
+      console.warn('Error syncing missing lesson study sessions:', err);
+    }
+  },
+
   async recordLessonCompletionSession(userId: string, lessonId: string, durationMinutes: number): Promise<StudySession | null> {
     const validUserId = toUuid(userId);
+    const validLessonId = lessonId ? toUuid(lessonId) : null;
     const dur = durationMinutes > 0 ? Number(durationMinutes) : 1;
     const today = new Date().toISOString().split('T')[0];
 
@@ -44,21 +137,23 @@ export const studySessionsService = {
       });
     }
 
-    // Prevent duplicate inserts for the same user + lesson (by session_date & duration)
-    const { data: existing } = await supabase
-      .from('study_sessions')
-      .select('*')
-      .eq('user_id', validUserId)
-      .eq('session_date', today)
-      .eq('duration_minutes', dur);
+    // Prevent duplicate inserts for the SAME lesson (by lesson_id)
+    if (validLessonId) {
+      const { data: existingByLesson } = await supabase
+        .from('study_sessions')
+        .select('*')
+        .eq('user_id', validUserId)
+        .eq('lesson_id', validLessonId);
 
-    if (existing && existing.length > 0) {
-      return existing[0] as StudySession;
+      if (existingByLesson && existingByLesson.length > 0) {
+        return existingByLesson[0] as StudySession;
+      }
     }
 
     const newSession = {
       id: crypto.randomUUID(),
       user_id: validUserId,
+      lesson_id: validLessonId,
       duration_minutes: dur,
       xp_earned: 0,
       session_date: today
@@ -79,9 +174,22 @@ export const studySessionsService = {
 
   async removeLessonCompletionSession(userId: string, lessonId: string, durationMinutes: number): Promise<boolean> {
     const validUserId = toUuid(userId);
+    const validLessonId = lessonId ? toUuid(lessonId) : null;
     const dur = durationMinutes > 0 ? Number(durationMinutes) : 1;
     const today = new Date().toISOString().split('T')[0];
 
+    // Delete strictly by user_id and lesson_id when lesson_id is present
+    if (validLessonId) {
+      const { error } = await supabase
+        .from('study_sessions')
+        .delete()
+        .eq('user_id', validUserId)
+        .eq('lesson_id', validLessonId);
+
+      if (!error) return true;
+    }
+
+    // Fallback for legacy rows without lesson_id
     const { error } = await supabase
       .from('study_sessions')
       .delete()

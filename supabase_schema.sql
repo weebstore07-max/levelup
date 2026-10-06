@@ -115,11 +115,15 @@ CREATE TABLE IF NOT EXISTS public.notifications (
 CREATE TABLE IF NOT EXISTS public.study_sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+  lesson_id UUID REFERENCES public.lessons(id) ON DELETE CASCADE NULL,
   duration_minutes INTEGER NOT NULL,
   xp_earned INTEGER DEFAULT 0,
   session_date DATE DEFAULT CURRENT_DATE,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Ensure lesson_id column exists on pre-existing table
+ALTER TABLE public.study_sessions ADD COLUMN IF NOT EXISTS lesson_id UUID REFERENCES public.lessons(id) ON DELETE CASCADE NULL;
 
 -- INDEXES FOR PERFORMANCE
 CREATE INDEX IF NOT EXISTS idx_lesson_progress_user ON public.lesson_progress(user_id);
@@ -128,6 +132,7 @@ CREATE INDEX IF NOT EXISTS idx_targets_user ON public.targets(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_achievements_user ON public.user_achievements(user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_user ON public.notifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_study_sessions_user ON public.study_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_study_sessions_lesson ON public.study_sessions(lesson_id);
 
 -- ENABLE ROW LEVEL SECURITY (RLS)
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
