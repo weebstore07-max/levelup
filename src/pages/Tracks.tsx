@@ -507,25 +507,10 @@ const parseYouTubeContentUrl = (input: string): ParsedYouTubeContent | null => {
   const grandRemainingLessons = Math.max(0, grandTotalLessons - grandCompletedLessons);
   const overallPct = grandTotalLessons > 0 ? Math.round((grandCompletedLessons / grandTotalLessons) * 100) : 0;
 
-  // 1. Total Learning Hours = SUM(lessons.duration_minutes) from completed lessons only
-  let totalCompletedMinutes = 0;
-  Object.keys(lessonsMap).forEach(courseId => {
-    const merged = getMergedLessonsForCourse(courseId);
-    merged.forEach(lesson => {
-      if (lesson.completed) {
-        totalCompletedMinutes += Number(lesson.duration_minutes) || 0;
-      }
-    });
-  });
-
-  const completedHours = Math.floor(totalCompletedMinutes / 60);
-  const completedMins = totalCompletedMinutes % 60;
-  const formattedTotalHours = completedMins > 0 ? `${completedHours}h ${completedMins}m` : `${completedHours}h`;
-
-  // 2. Active Courses = count of courses where completion is less than 100%
+  // Active Courses = count of courses where completion is less than 100%
   const activeCoursesCount = courses.filter(c => getCourseMetrics(c.id, c.total_lessons).pct < 100).length;
 
-  // 3. Completed Courses = count of courses where every lesson is completed (pct === 100%)
+  // Completed Courses = count of courses where every lesson is completed (pct === 100%)
   const completedCoursesCount = courses.filter(c => getCourseMetrics(c.id, c.total_lessons).pct === 100).length;
 
   // Sorting
@@ -550,18 +535,7 @@ const parseYouTubeContentUrl = (input: string): ParsedYouTubeContent | null => {
         </div>
 
         {/* Top Metrics Row */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-grid-gutter">
-          <div className="card-surface rounded-xl p-card-padding flex items-start gap-4 bg-surface-container-lowest card-border">
-            <div className="w-12 h-12 rounded-full bg-[#f0e7d8] flex items-center justify-center text-[#c9a843]">
-              <span className="material-symbols-outlined">schedule</span>
-            </div>
-            <div>
-              <div className="font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">Total Learning Hours</div>
-              <div className="font-headline-md text-headline-md text-primary">{formattedTotalHours}</div>
-              <div className="font-label-sm text-label-sm text-on-surface-variant mt-2">Across all courses</div>
-            </div>
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-grid-gutter">
           <div className="card-surface rounded-xl p-card-padding flex items-start gap-4 bg-surface-container-lowest card-border">
             <div className="w-12 h-12 rounded-full bg-[#e6f4ea] flex items-center justify-center text-[#1e8e3e]">
               <span className="material-symbols-outlined">menu_book</span>
