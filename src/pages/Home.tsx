@@ -46,12 +46,6 @@ export const Home: React.FC = () => {
             How It Works
           </a>
           <a
-            href="#testimonials"
-            className="text-[#666666] hover:text-[#111111] font-medium px-4 py-1.5 text-sm transition-colors"
-          >
-            Testimonials
-          </a>
-          <a
             href="#faq"
             className="text-[#666666] hover:text-[#111111] font-medium px-4 py-1.5 text-sm transition-colors"
           >
@@ -70,20 +64,12 @@ export const Home: React.FC = () => {
               <span className="material-symbols-outlined text-sm">arrow_forward</span>
             </Link>
           ) : (
-            <>
-              <Link
-                to="/login"
-                className="border border-[#E0D5C1] hover:bg-[#F2ECE1] text-[#111111] font-medium text-sm px-5 py-2.5 rounded-xl transition-colors"
-              >
-                Log in
-              </Link>
-              <Link
-                to="/login?mode=signup"
-                className="bg-[#111111] hover:bg-[#222222] text-white font-medium text-sm px-5 py-2.5 rounded-xl transition-colors shadow-2xs"
-              >
-                Get Started
-              </Link>
-            </>
+            <Link
+              to="/login"
+              className="border border-[#E0D5C1] hover:bg-[#F2ECE1] text-[#111111] font-medium text-sm px-5 py-2.5 rounded-xl transition-colors"
+            >
+              Log in
+            </Link>
           )}
         </div>
 
@@ -124,13 +110,6 @@ export const Home: React.FC = () => {
               How It Works
             </a>
             <a
-              href="#testimonials"
-              onClick={() => setMobileMenuOpen(false)}
-              className="font-medium text-[#666666] hover:text-[#111111] py-1"
-            >
-              Testimonials
-            </a>
-            <a
               href="#faq"
               onClick={() => setMobileMenuOpen(false)}
               className="font-medium text-[#666666] hover:text-[#111111] py-1"
@@ -147,22 +126,13 @@ export const Home: React.FC = () => {
                 Go to Dashboard
               </Link>
             ) : (
-              <div className="flex flex-col gap-2">
-                <Link
-                  to="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center border border-[#E0D5C1] text-[#111111] font-medium py-3 rounded-xl"
-                >
-                  Log in
-                </Link>
-                <Link
-                  to="/login?mode=signup"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center bg-[#111111] text-white font-medium py-3 rounded-xl"
-                >
-                  Get Started
-                </Link>
-              </div>
+              <Link
+                to="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full text-center border border-[#E0D5C1] text-[#111111] font-medium py-3 rounded-xl"
+              >
+                Log in
+              </Link>
             )}
           </div>
         )}
@@ -391,50 +361,6 @@ export const Home: React.FC = () => {
               <p className="text-sm text-[#666666] leading-relaxed">
                 Earn XP for completed modules, unlock rarity-tiered achievements, and inspect week-by-week analytics to uncover your most productive hours.
               </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* TESTIMONIALS SECTION */}
-      <section id="testimonials" className="w-full max-w-7xl mx-auto px-6 py-20">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="font-serif text-4xl sm:text-5xl font-bold text-[#111111] mb-4">
-            Built for Self-Learners
-          </h2>
-          <p className="text-base text-[#666666]">
-            Here is how LevelUp helps learners stay consistent and achieve their goals.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-[#F5EFE6] border border-[#E5DAC8] rounded-3xl p-8 flex flex-col justify-between">
-            <p className="text-sm text-[#333333] leading-relaxed italic mb-6">
-              "LevelUp completely changed how I watch technical tutorials. Turning YouTube playlists into tracked modules gave me the structure I was missing."
-            </p>
-            <div>
-              <p className="font-serif text-base font-bold text-[#111111]">Alex Chen</p>
-              <p className="text-xs text-[#8C8275]">Software Engineering Learner</p>
-            </div>
-          </div>
-
-          <div className="bg-[#F5EFE6] border border-[#E5DAC8] rounded-3xl p-8 flex flex-col justify-between">
-            <p className="text-sm text-[#333333] leading-relaxed italic mb-6">
-              "The daily streak system and freeze pass protections kept me accountable for over 90 days straight. I've finished 4 complete computer science tracks."
-            </p>
-            <div>
-              <p className="font-serif text-base font-bold text-[#111111]">Sarah Jenkins</p>
-              <p className="text-xs text-[#8C8275]">Data Science Student</p>
-            </div>
-          </div>
-
-          <div className="bg-[#F5EFE6] border border-[#E5DAC8] rounded-3xl p-8 flex flex-col justify-between">
-            <p className="text-sm text-[#333333] leading-relaxed italic mb-6">
-              "Seeing my real XP and peak productive hours in analytics makes studying feel like playing an RPG. I actually look forward to logging my study sessions."
-            </p>
-            <div>
-              <p className="font-serif text-base font-bold text-[#111111]">David Miller</p>
-              <p className="text-xs text-[#8C8275]">UI/UX Designer</p>
             </div>
           </div>
         </div>
