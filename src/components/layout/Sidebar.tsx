@@ -10,7 +10,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => 
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navItems = [
-    { label: 'Dashboard', path: '/', icon: 'dashboard' },
+    { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
     { label: 'Tracks', path: '/tracks', icon: 'subscriptions' },
     { label: 'Analytics', path: '/analytics', icon: 'analytics' },
     { label: 'Targets', path: '/targets', icon: 'track_changes' },

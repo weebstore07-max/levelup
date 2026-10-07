@@ -82,11 +82,11 @@ export const Login: React.FC = () => {
         if (res.confirmationRequired) {
           setMessage('Account created. Please check your Gmail inbox to confirm your email before signing in.');
         } else {
-          navigate('/');
+          navigate('/dashboard');
         }
       } else {
         await login(cleanEmail, password);
-        navigate('/');
+        navigate('/dashboard');
       }
     } catch (err: any) {
       console.error('Auth error:', err);
