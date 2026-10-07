@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { checkPasswordRequirements, getPasswordValidationError } from '../utils/passwordValidation';
 
 export const Login: React.FC = () => {
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [searchParams] = useSearchParams();
+  const isSignUpParam = searchParams.get('mode') === 'signup' || searchParams.get('signup') === 'true';
+
+  const [isSignUp, setIsSignUp] = useState(isSignUpParam);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -23,6 +26,12 @@ export const Login: React.FC = () => {
       navigate('/reset-password');
     }
   }, [isPasswordRecovery, navigate]);
+
+  useEffect(() => {
+    if (isSignUpParam) {
+      setIsSignUp(true);
+    }
+  }, [isSignUpParam]);
 
   const handleGoogleSignIn = async () => {
     try {
