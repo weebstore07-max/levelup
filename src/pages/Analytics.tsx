@@ -6,7 +6,6 @@ import { StudySession, LessonProgress, Course, Lesson, UserProfile } from '../ty
 
 export const Analytics: React.FC = () => {
   const { userProfile, currentUser } = useAuth();
-  const [weekOffset, setWeekOffset] = useState<number>(0);
   const [studySessions, setStudySessions] = useState<StudySession[]>([]);
   const [lessonProgress, setLessonProgress] = useState<LessonProgress[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
@@ -108,16 +107,13 @@ export const Analytics: React.FC = () => {
     }
   });
 
-  // Weekly Study Time Chart (Mon–Sun) supporting week-by-week navigation
-  const getSelectedWeekDays = () => {
+  // Weekly Study Time Chart (Mon–Sun current week)
+  const getWeeklyDays = () => {
     const days = [];
     const now = new Date();
     const currentDay = now.getDay();
     const distanceToMon = currentDay === 0 ? -6 : 1 - currentDay;
-    const currentMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + distanceToMon);
-
-    const monday = new Date(currentMonday.getFullYear(), currentMonday.getMonth(), currentMonday.getDate() + (weekOffset * 7));
-    const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6);
+    const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + distanceToMon);
 
     const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const todayStr = formatDateKey(now);
@@ -147,13 +143,10 @@ export const Analytics: React.FC = () => {
       });
     }
 
-    const formatShortDate = (dt: Date) => dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const weekRangeStr = `${formatShortDate(monday)} – ${formatShortDate(sunday)}`;
-
-    return { days, monday, sunday, weekRangeStr };
+    return { days, monday };
   };
 
-  const { days: weeklyDays, monday: selectedMonday, weekRangeStr } = getSelectedWeekDays();
+  const { days: weeklyDays, monday: currentMonday } = getWeeklyDays();
   const totalWeeklyMins = weeklyDays.reduce((sum, d) => sum + d.mins, 0);
   const totalWeekly7dHrs = Math.floor(totalWeeklyMins / 60);
   const totalWeekly7dMins = totalWeeklyMins % 60;
@@ -196,12 +189,12 @@ export const Analytics: React.FC = () => {
   };
   const learningCategories = calculateLearningCategories();
 
-  // XP Progress for selected week
-  const getXpProgressForSelectedWeek = () => {
+  // XP Progress for current 7 days
+  const getXpProgress = () => {
     const days = [];
     const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     for (let i = 0; i < 7; i++) {
-      const d = new Date(selectedMonday.getFullYear(), selectedMonday.getMonth(), selectedMonday.getDate() + i);
+      const d = new Date(currentMonday.getFullYear(), currentMonday.getMonth(), currentMonday.getDate() + i);
       const dateStr = formatDateKey(d);
       const dayLabel = dayLabels[i];
       const sessionXp = studySessions
@@ -218,7 +211,7 @@ export const Analytics: React.FC = () => {
     }
     return days;
   };
-  const xpProgressData = getXpProgressForSelectedWeek();
+  const xpProgressData = getXpProgress();
   const maxXp = Math.max(...xpProgressData.map(d => d.dayXp), 100);
 
   // Most Productive Time calculation
@@ -318,32 +311,7 @@ export const Analytics: React.FC = () => {
                   <span className="material-symbols-outlined text-[22px] text-primary">bar_chart</span>
                   <h3 className="font-title-lg text-title-lg text-primary font-bold">Weekly Learning Activity</h3>
                 </div>
-                <div className="flex items-center gap-3 self-end sm:self-auto">
-                  {/* Compact Week Navigator */}
-                  <div className="flex items-center gap-1 rounded-lg bg-surface border card-border px-2 py-1 shadow-xs text-on-surface-variant">
-                    <button
-                      type="button"
-                      onClick={() => setWeekOffset(prev => prev - 1)}
-                      className="w-6 h-6 rounded flex items-center justify-center hover:bg-surface-container-high transition-colors cursor-pointer text-primary"
-                      title="Previous week"
-                      aria-label="Previous week"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">chevron_left</span>
-                    </button>
-                    <span className="font-label-sm text-xs font-semibold text-primary px-1.5 whitespace-nowrap">
-                      {weekRangeStr}
-                    </span>
-                    <button
-                      type="button"
-                      disabled={weekOffset >= 0}
-                      onClick={() => setWeekOffset(prev => Math.min(0, prev + 1))}
-                      className="w-6 h-6 rounded flex items-center justify-center hover:bg-surface-container-high transition-colors text-primary disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                      title="Next week"
-                      aria-label="Next week"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">chevron_right</span>
-                    </button>
-                  </div>
+                <div className="flex items-center gap-3">
                   <span className="font-title-md text-title-md text-primary font-bold font-mono">
                     {formatted7dTotal}
                   </span>
@@ -440,7 +408,7 @@ export const Analytics: React.FC = () => {
               <div className="flex justify-between items-center mb-6">
                 <h3 className="font-title-lg text-title-lg text-primary font-bold flex items-center gap-2">
                   <span className="material-symbols-outlined text-tertiary">trending_up</span>
-                  XP Progress ({weekRangeStr})
+                  XP Progress (Last 7 Days)
                 </h3>
                 <span className="font-label-sm text-label-sm text-on-surface-variant">Daily XP</span>
               </div>
