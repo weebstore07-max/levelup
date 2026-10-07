@@ -277,11 +277,27 @@ export const Achievements: React.FC = () => {
             </div>
           ) : filteredAchievements.length === 0 ? (
             <div className="bg-[#FBFAF7] border border-[#DDD4C6] rounded-[20px] p-12 text-center flex flex-col items-center justify-center gap-3 shadow-xs">
-              <div className="w-12 h-12 rounded-full bg-[#F6F2E8] border border-[#DDD4C6] flex items-center justify-center text-[#6F6B63]">
-                <span className="material-symbols-outlined text-2xl">search_off</span>
+              <div className="w-16 h-16 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] mb-1">
+                <span className="material-symbols-outlined text-3xl">{activeFilter === 'Unlocked' ? 'emoji_events' : 'search_off'}</span>
               </div>
-              <p className="font-title-lg font-bold text-[#111111]">No Badges Found</p>
-              <p className="font-body-md text-sm text-[#6F6B63]">No achievements match the selected filter.</p>
+              <p className="font-display-md text-display-md font-bold text-[#111111]">
+                {activeFilter === 'Unlocked' ? 'Your trophy shelf is waiting' : 'No Badges Found'}
+              </p>
+              <p className="font-body-md text-sm text-[#6F6B63] max-w-md">
+                {activeFilter === 'Unlocked' 
+                  ? 'Complete lessons and challenges to unlock your first achievement.'
+                  : 'No achievements match the selected filter.'}
+              </p>
+              {activeFilter === 'Unlocked' && (
+                <button
+                  type="button"
+                  onClick={() => window.location.href = '/tracks'}
+                  className="bg-[#111111] text-white font-label-md text-label-md px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 cursor-pointer shadow-xs mt-2"
+                >
+                  <span>Start Learning</span>
+                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

@@ -341,12 +341,12 @@ export const Notifications: React.FC = () => {
         ) : notificationGroups.length === 0 ? (
           /* Empty State */
           <div className="bg-[#F8F5EE] border border-[#E8E1D4] rounded-[24px] p-12 text-center flex flex-col items-center justify-center max-w-lg mx-auto shadow-sm my-6">
-            <div className="w-16 h-16 rounded-full bg-[#F0E7D8] flex items-center justify-center border border-outline-variant/30 text-[#8C7A5B] mb-4">
-              <span className="material-symbols-outlined text-3xl">notifications_off</span>
+            <div className="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center border border-outline-variant/30 text-primary mb-4">
+              <span className="material-symbols-outlined text-3xl">notifications</span>
             </div>
-            <h3 className="font-title-lg text-title-lg font-bold text-primary mb-1">No notifications yet</h3>
-            <p className="font-body-md text-sm text-on-surface-variant text-center">
-              Your achievements, reminders, and progress updates will appear here.
+            <h3 className="font-display-md text-display-md font-bold text-primary mb-2">You're all caught up</h3>
+            <p className="font-body-md text-body-md text-on-surface-variant text-center max-w-md">
+              New learning updates and achievements will appear here.
             </p>
           </div>
         ) : (

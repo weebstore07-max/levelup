@@ -212,9 +212,13 @@ export const Analytics: React.FC = () => {
     return days;
   };
   const xpProgressData = getXpProgress();
+  const totalPeriodXp = xpProgressData.reduce((sum, d) => sum + d.dayXp, 0);
   const maxXp = Math.max(...xpProgressData.map(d => d.dayXp), 100);
 
   // Most Productive Time calculation
+  const totalStudySessionMinutes = studySessions.reduce((sum, s) => sum + (s.duration_minutes || 0), 0);
+  const hasStudyActivity = studySessions.length > 0 && totalStudySessionMinutes > 0;
+
   const getMostProductiveTime = () => {
     const periods = {
       Morning: { count: 0, icon: 'wb_sunny', label: 'Morning', range: '6:00 AM – 11:59 AM', message: 'Morning Bird! You are most active early in the day.' },
@@ -317,46 +321,58 @@ export const Analytics: React.FC = () => {
                   </span>
                 </div>
               </div>
-              <div className="h-[160px] flex items-end justify-between gap-4 px-4 relative mt-2">
-                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pb-8">
-                  <div className="border-b border-outline-variant/15 w-full"></div>
-                  <div className="border-b border-outline-variant/15 w-full"></div>
-                  <div className="border-b border-outline-variant/15 w-full"></div>
-                  <div className="border-b border-outline-variant/15 w-full"></div>
+              {studySessions.length === 0 || totalWeeklyMins === 0 ? (
+                <div className="h-[160px] flex flex-col items-center justify-center text-center py-4">
+                  <div className="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center mb-2 text-primary">
+                    <span className="material-symbols-outlined text-2xl">bar_chart</span>
+                  </div>
+                  <h4 className="font-title-md font-bold text-primary">Your progress will appear here</h4>
+                  <p className="font-label-sm text-xs text-on-surface-variant max-w-sm mt-1">
+                    Complete your first lesson to start building your learning analytics.
+                  </p>
                 </div>
+              ) : (
+                <div className="h-[160px] flex items-end justify-between gap-4 px-4 relative mt-2">
+                  <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pb-8">
+                    <div className="border-b border-outline-variant/15 w-full"></div>
+                    <div className="border-b border-outline-variant/15 w-full"></div>
+                    <div className="border-b border-outline-variant/15 w-full"></div>
+                    <div className="border-b border-outline-variant/15 w-full"></div>
+                  </div>
 
-                {weeklyDays.map((bar) => {
-                  const pct = maxWeeklyMins > 0 && bar.mins > 0 ? Math.round((bar.mins / maxWeeklyMins) * 100) : 0;
-                  return (
-                    <div key={bar.day} className="flex-1 flex flex-col items-center h-full justify-end z-10">
-                      <div className="w-full h-[120px] flex flex-col justify-end items-center relative">
-                        {bar.isToday && bar.mins > 0 && (
-                          <span className="text-[11px] font-bold text-primary mb-1 font-mono">
-                            {bar.mins}m
-                          </span>
-                        )}
-                        <div 
-                          className={`w-full rounded-t-[10px] transition-all duration-200 cursor-pointer group relative ${
-                            bar.isToday ? 'bg-primary' : 'bg-[#D4AF37] hover:bg-primary'
-                          }`}
-                          style={{ height: `${pct}%`, minHeight: bar.mins > 0 ? '6px' : '0px' }}
-                        >
-                          {!bar.isToday && bar.mins > 0 && (
-                            <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface text-[10px] px-2 py-0.5 rounded shadow opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none font-mono">
-                              {bar.hours} hrs
-                            </div>
+                  {weeklyDays.map((bar) => {
+                    const pct = maxWeeklyMins > 0 && bar.mins > 0 ? Math.round((bar.mins / maxWeeklyMins) * 100) : 0;
+                    return (
+                      <div key={bar.day} className="flex-1 flex flex-col items-center h-full justify-end z-10">
+                        <div className="w-full h-[120px] flex flex-col justify-end items-center relative">
+                          {bar.isToday && bar.mins > 0 && (
+                            <span className="text-[11px] font-bold text-primary mb-1 font-mono">
+                              {bar.mins}m
+                            </span>
                           )}
+                          <div 
+                            className={`w-full rounded-t-[10px] transition-all duration-200 cursor-pointer group relative ${
+                              bar.isToday ? 'bg-primary' : 'bg-[#D4AF37] hover:bg-primary'
+                            }`}
+                            style={{ height: `${pct}%`, minHeight: bar.mins > 0 ? '6px' : '0px' }}
+                          >
+                            {!bar.isToday && bar.mins > 0 && (
+                              <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface text-[10px] px-2 py-0.5 rounded shadow opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none font-mono">
+                                {bar.hours} hrs
+                              </div>
+                            )}
+                          </div>
                         </div>
+                        <span className={`font-label-sm text-label-sm mt-2 font-semibold ${
+                          bar.isToday ? 'text-primary font-bold' : 'text-on-surface-variant'
+                        }`}>
+                          {bar.day}
+                        </span>
                       </div>
-                      <span className={`font-label-sm text-label-sm mt-2 font-semibold ${
-                        bar.isToday ? 'text-primary font-bold' : 'text-on-surface-variant'
-                      }`}>
-                        {bar.day}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 
@@ -412,23 +428,35 @@ export const Analytics: React.FC = () => {
                 </h3>
                 <span className="font-label-sm text-label-sm text-on-surface-variant">Daily XP</span>
               </div>
-              <div className="h-48 flex items-end justify-between gap-3 px-2 relative mb-4">
-                {xpProgressData.map((d) => {
-                  const pct = Math.max(15, Math.round((d.dayXp / maxXp) * 100));
-                  return (
-                    <div key={d.dateStr} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group relative">
-                      <div className="text-[10px] text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity font-mono absolute -top-4">
-                        +{d.dayXp} XP
+              {totalPeriodXp === 0 ? (
+                <div className="h-48 flex flex-col items-center justify-center text-center py-4 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center mb-2 text-primary">
+                    <span className="material-symbols-outlined text-2xl">trending_up</span>
+                  </div>
+                  <h4 className="font-title-md font-bold text-primary">Your XP progress will appear here</h4>
+                  <p className="font-label-sm text-xs text-on-surface-variant max-w-sm mt-1">
+                    Earn XP by completing lessons, tasks, and achievements.
+                  </p>
+                </div>
+              ) : (
+                <div className="h-48 flex items-end justify-between gap-3 px-2 relative mb-4">
+                  {xpProgressData.map((d) => {
+                    const pct = Math.max(15, Math.round((d.dayXp / maxXp) * 100));
+                    return (
+                      <div key={d.dateStr} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group relative">
+                        <div className="text-[10px] text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity font-mono absolute -top-4">
+                          +{d.dayXp} XP
+                        </div>
+                        <div 
+                          className="w-full bg-[#1e8e3e] hover:opacity-90 transition-opacity rounded-t"
+                          style={{ height: `${pct}%` }}
+                        ></div>
+                        <span className="text-[11px] font-semibold text-on-surface-variant">{d.dayLabel}</span>
                       </div>
-                      <div 
-                        className="w-full bg-[#1e8e3e] hover:opacity-90 transition-opacity rounded-t"
-                        style={{ height: `${pct}%` }}
-                      ></div>
-                      <span className="text-[11px] font-semibold text-on-surface-variant">{d.dayLabel}</span>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="pt-4 border-t border-outline-variant/30 flex justify-between items-center">
@@ -444,18 +472,32 @@ export const Analytics: React.FC = () => {
                 <span className="material-symbols-outlined">schedule</span>
                 Most Productive Time
               </h3>
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-surface-container-highest/40 border border-outline-variant/30 mb-4">
-                <div className="w-14 h-14 rounded-full bg-[#f0e7d8] flex items-center justify-center text-[#c9a843] flex-shrink-0">
-                  <span className="material-symbols-outlined text-2xl">{peakTime.icon}</span>
+              {!hasStudyActivity ? (
+                <div className="py-8 text-center flex flex-col items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center mb-2 text-primary">
+                    <span className="material-symbols-outlined text-2xl">schedule</span>
+                  </div>
+                  <h4 className="font-title-md font-bold text-primary">Your productive time will appear here</h4>
+                  <p className="font-label-sm text-xs text-on-surface-variant max-w-sm mt-1">
+                    Complete a few study sessions to discover when you learn best.
+                  </p>
                 </div>
-                <div>
-                  <div className="font-title-lg text-title-lg font-bold text-primary">{peakTime.label}</div>
-                  <div className="font-label-sm text-label-sm text-on-surface-variant font-mono">{peakTime.range}</div>
-                </div>
-              </div>
-              <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                {peakTime.message}
-              </p>
+              ) : (
+                <>
+                  <div className="flex items-center gap-4 p-4 rounded-xl bg-surface-container-highest/40 border border-outline-variant/30 mb-4">
+                    <div className="w-14 h-14 rounded-full bg-[#f0e7d8] flex items-center justify-center text-[#c9a843] flex-shrink-0">
+                      <span className="material-symbols-outlined text-2xl">{peakTime.icon}</span>
+                    </div>
+                    <div>
+                      <div className="font-title-lg text-title-lg font-bold text-primary">{peakTime.label}</div>
+                      <div className="font-label-sm text-label-sm text-on-surface-variant font-mono">{peakTime.range}</div>
+                    </div>
+                  </div>
+                  <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                    {peakTime.message}
+                  </p>
+                </>
+              )}
             </div>
 
             <div className="pt-4 border-t border-outline-variant/30 text-center">

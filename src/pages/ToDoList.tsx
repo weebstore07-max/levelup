@@ -390,89 +390,117 @@ export const ToDoList: React.FC = () => {
         </div>
 
         {/* 4. Task Sections */}
-        <div className="flex flex-col gap-8">
-          {/* Section A: Today's Tasks */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-title-lg text-title-lg font-bold text-primary flex items-center gap-2">
-                <span className="material-symbols-outlined text-xl text-[#8C7A5B]">today</span>
-                Today's Tasks ({todaysTasks.length})
-              </h3>
-              <span className="font-label-sm text-xs text-on-surface-variant">Sorted by Priority</span>
+        {todos.length === 0 ? (
+          <div className="bg-white border border-[#E7E1D6] rounded-xl p-12 text-center flex flex-col items-center justify-center my-4">
+            <div className="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center mb-4 text-primary">
+              <span className="material-symbols-outlined text-3xl">check_circle</span>
             </div>
-
-            {todaysTasks.length === 0 ? (
-              <div className="bg-white border border-[#E7E1D6] rounded-[18px] p-8 text-center flex flex-col items-center justify-center">
-                <span className="material-symbols-outlined text-3xl text-on-surface-variant mb-2">done_all</span>
-                <p className="font-body-md text-on-surface-variant text-sm font-medium">
-                  No tasks due today. You're all caught up!
-                </p>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3">
-                {todaysTasks.map((todo) => renderTaskCard(todo))}
-              </div>
-            )}
-          </div>
-
-          {/* Section B: Upcoming */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-title-lg text-title-lg font-bold text-primary flex items-center gap-2">
-                <span className="material-symbols-outlined text-xl text-primary">event_upcoming</span>
-                Upcoming ({upcomingTasks.length})
-              </h3>
-              <span className="font-label-sm text-xs text-on-surface-variant">Ordered by Due Date</span>
-            </div>
-
-            {upcomingTasks.length === 0 ? (
-              <div className="bg-white border border-[#E7E1D6] rounded-[18px] p-8 text-center flex flex-col items-center justify-center">
-                <span className="material-symbols-outlined text-3xl text-on-surface-variant mb-2">event_available</span>
-                <p className="font-body-md text-on-surface-variant text-sm font-medium">
-                  No upcoming tasks scheduled.
-                </p>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3">
-                {upcomingTasks.map((todo) => renderTaskCard(todo))}
-              </div>
-            )}
-          </div>
-
-          {/* Section C: Completed */}
-          <div>
-            <div 
-              onClick={() => setIsCompletedExpanded(!isCompletedExpanded)}
-              className="flex items-center justify-between mb-4 cursor-pointer select-none group"
+            <h3 className="font-display-md text-display-md text-primary font-bold mb-2">
+              Nothing planned yet
+            </h3>
+            <p className="font-body-md text-body-md text-on-surface-variant max-w-md mb-6">
+              Add a task to plan your next learning action.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                const inputEl = document.querySelector('input[placeholder*="study or accomplish"]') as HTMLInputElement;
+                if (inputEl) {
+                  inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  inputEl.focus();
+                }
+              }}
+              className="bg-primary text-on-primary font-label-md text-label-md px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 cursor-pointer shadow-xs"
             >
-              <h3 className="font-title-lg text-title-lg font-bold text-primary flex items-center gap-2">
-                <span className="material-symbols-outlined text-xl text-[#1e8e3e]">task_alt</span>
-                Completed ({completedTasks.length})
-              </h3>
-              <button className="text-on-surface-variant group-hover:text-primary transition-colors flex items-center gap-1 font-label-sm text-xs font-semibold cursor-pointer">
-                <span>{isCompletedExpanded ? 'Hide' : 'Show'}</span>
-                <span className="material-symbols-outlined text-lg">
-                  {isCompletedExpanded ? 'expand_less' : 'expand_more'}
-                </span>
-              </button>
-            </div>
+              <span className="material-symbols-outlined text-sm">add</span>
+              <span>Add Task</span>
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-8">
+            {/* Section A: Today's Tasks */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-title-lg text-title-lg font-bold text-primary flex items-center gap-2">
+                  <span className="material-symbols-outlined text-xl text-[#8C7A5B]">today</span>
+                  Today's Tasks ({todaysTasks.length})
+                </h3>
+                <span className="font-label-sm text-xs text-on-surface-variant">Sorted by Priority</span>
+              </div>
 
-            {isCompletedExpanded && (
-              completedTasks.length === 0 ? (
+              {todaysTasks.length === 0 ? (
                 <div className="bg-white border border-[#E7E1D6] rounded-[18px] p-8 text-center flex flex-col items-center justify-center">
-                  <span className="material-symbols-outlined text-3xl text-on-surface-variant mb-2">check_circle_outline</span>
+                  <span className="material-symbols-outlined text-3xl text-on-surface-variant mb-2">done_all</span>
                   <p className="font-body-md text-on-surface-variant text-sm font-medium">
-                    No completed tasks yet. Check off a task to earn XP!
+                    No tasks due today. You're all caught up!
                   </p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-3">
-                  {completedTasks.map((todo) => renderTaskCard(todo))}
+                  {todaysTasks.map((todo) => renderTaskCard(todo))}
                 </div>
-              )
-            )}
+              )}
+            </div>
+
+            {/* Section B: Upcoming */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-title-lg text-title-lg font-bold text-primary flex items-center gap-2">
+                  <span className="material-symbols-outlined text-xl text-primary">event_upcoming</span>
+                  Upcoming ({upcomingTasks.length})
+                </h3>
+                <span className="font-label-sm text-xs text-on-surface-variant">Ordered by Due Date</span>
+              </div>
+
+              {upcomingTasks.length === 0 ? (
+                <div className="bg-white border border-[#E7E1D6] rounded-[18px] p-8 text-center flex flex-col items-center justify-center">
+                  <span className="material-symbols-outlined text-3xl text-on-surface-variant mb-2">event_available</span>
+                  <p className="font-body-md text-on-surface-variant text-sm font-medium">
+                    No upcoming tasks scheduled.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {upcomingTasks.map((todo) => renderTaskCard(todo))}
+                </div>
+              )}
+            </div>
+
+            {/* Section C: Completed */}
+            <div>
+              <div 
+                onClick={() => setIsCompletedExpanded(!isCompletedExpanded)}
+                className="flex items-center justify-between mb-4 cursor-pointer select-none group"
+              >
+                <h3 className="font-title-lg text-title-lg font-bold text-primary flex items-center gap-2">
+                  <span className="material-symbols-outlined text-xl text-[#1e8e3e]">task_alt</span>
+                  Completed ({completedTasks.length})
+                </h3>
+                <button className="text-on-surface-variant group-hover:text-primary transition-colors flex items-center gap-1 font-label-sm text-xs font-semibold cursor-pointer">
+                  <span>{isCompletedExpanded ? 'Hide' : 'Show'}</span>
+                  <span className="material-symbols-outlined text-lg">
+                    {isCompletedExpanded ? 'expand_less' : 'expand_more'}
+                  </span>
+                </button>
+              </div>
+
+              {isCompletedExpanded && (
+                completedTasks.length === 0 ? (
+                  <div className="bg-white border border-[#E7E1D6] rounded-[18px] p-8 text-center flex flex-col items-center justify-center">
+                    <span className="material-symbols-outlined text-3xl text-on-surface-variant mb-2">check_circle_outline</span>
+                    <p className="font-body-md text-on-surface-variant text-sm font-medium">
+                      No completed tasks yet. Check off a task to earn XP!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {completedTasks.map((todo) => renderTaskCard(todo))}
+                  </div>
+                )
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Edit Task Modal */}
         {editingTodo && (

@@ -618,13 +618,26 @@ const parseYouTubeContentUrl = (input: string): ParsedYouTubeContent | null => {
         {/* Active Courses List */}
         {courses.length === 0 ? (
           <div className="bg-white border border-[#E7E1D6] rounded-xl p-12 text-center flex flex-col items-center justify-center my-4">
-            <div className="w-20 h-20 rounded-full bg-[#f4efe6] flex items-center justify-center mb-4 text-[#8C7A5B]">
-              <span className="material-symbols-outlined text-4xl">video_library</span>
+            <div className="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center mb-4 text-primary">
+              <span className="material-symbols-outlined text-3xl">menu_book</span>
             </div>
-            <h3 className="font-headline-sm text-headline-sm text-primary font-bold mb-2">No Courses Yet</h3>
-            <p className="font-body-md text-body-md text-on-surface-variant max-w-md">
-              Import your first YouTube video or playlist to begin your learning journey.
+            <h3 className="font-display-md text-display-md text-primary font-bold mb-2">
+              Your learning journey starts here
+            </h3>
+            <p className="font-body-md text-body-md text-on-surface-variant max-w-md mb-6">
+              Add a YouTube playlist to create your first learning track.
             </p>
+            <button
+              type="button"
+              onClick={() => {
+                importInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                importInputRef.current?.focus();
+              }}
+              className="bg-primary text-on-primary font-label-md text-label-md px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 cursor-pointer shadow-xs"
+            >
+              <span className="material-symbols-outlined text-sm">add</span>
+              <span>Create Track</span>
+            </button>
           </div>
         ) : (
           <div>

@@ -500,7 +500,22 @@ export const Dashboard: React.FC = () => {
 
           <div className="flex flex-col gap-4 flex-1">
             {courses.length === 0 ? (
-              <p className="font-body-md text-on-surface-variant text-sm">No active courses found. Go to Tracks to add one!</p>
+              <div className="py-8 text-center flex flex-col items-center justify-center my-2">
+                <div className="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center mb-4 text-primary">
+                  <span className="material-symbols-outlined text-3xl">play_circle</span>
+                </div>
+                <h4 className="font-display-md text-display-md font-bold text-primary mb-2">Ready to learn?</h4>
+                <p className="font-body-md text-body-md text-on-surface-variant max-w-md mb-6">
+                  Start a lesson and your active learning session will appear here.
+                </p>
+                <Link
+                  to="/tracks"
+                  className="bg-primary text-on-primary font-label-md text-label-md px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 cursor-pointer shadow-xs"
+                >
+                  <span>Start Learning</span>
+                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                </Link>
+              </div>
             ) : (
               [...courses]
                 .sort((a, b) => {

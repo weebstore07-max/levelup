@@ -532,13 +532,27 @@ export const Targets: React.FC = () => {
             ) : sortedTargets.length === 0 ? (
               /* Clean Empty State */
               <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-12 text-center flex flex-col items-center justify-center gap-3 shadow-sm">
-                <div className="w-16 h-16 rounded-full bg-amber-50 text-[#D4AF37] flex items-center justify-center border border-amber-200">
-                  <span className="material-symbols-outlined text-3xl">target</span>
+                <div className="w-16 h-16 rounded-full bg-amber-50 text-[#D4AF37] flex items-center justify-center border border-amber-200 mb-1">
+                  <span className="material-symbols-outlined text-3xl">track_changes</span>
                 </div>
-                <h4 className="font-title-lg text-title-lg text-primary font-bold">No Targets Set Yet</h4>
-                <p className="font-body-md text-body-md text-on-surface-variant max-w-md">
-                  Create your first goal using the form above to start tracking your learning progress.
+                <h4 className="font-display-md text-display-md text-primary font-bold">Set your first target</h4>
+                <p className="font-body-md text-body-md text-on-surface-variant max-w-md mb-2">
+                  Create a learning target and start building momentum.
                 </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const titleInput = document.querySelector('input[placeholder*="Target title"]') as HTMLInputElement;
+                    if (titleInput) {
+                      titleInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      titleInput.focus();
+                    }
+                  }}
+                  className="bg-primary text-on-primary font-label-md text-label-md px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 cursor-pointer shadow-xs"
+                >
+                  <span className="material-symbols-outlined text-sm">add</span>
+                  <span>Create Target</span>
+                </button>
               </div>
             ) : (
               /* Targets Grid */
