@@ -63,7 +63,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => 
         <div className="flex items-center gap-3">
           <span className="material-symbols-outlined text-3xl text-primary">menu_book</span>
           {(!collapsed || mobileOpen) && (
-            <div className="font-headline-md text-headline-md text-primary dark:text-on-primary">
+            <div className="font-headline-md text-headline-md text-primary">
               Level Up
             </div>
           )}
@@ -81,8 +81,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => 
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                   isActive
-                    ? 'bg-secondary-container dark:bg-secondary-fixed-dim text-on-secondary-container dark:text-on-secondary-fixed-variant font-bold scale-[0.98]'
-                    : 'text-on-surface-variant dark:text-surface-variant hover:text-on-surface dark:hover:text-on-surface hover:bg-surface-container-highest dark:hover:bg-surface-dim'
+                    ? 'bg-secondary-container text-on-secondary-container font-bold scale-[0.98]'
+                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest'
                 } ${collapsed && !mobileOpen ? 'justify-center px-0' : ''}`
               }
             >

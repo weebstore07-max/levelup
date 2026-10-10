@@ -2,13 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageLayout } from '../components/layout/PageLayout';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 import { profileService, usersService } from '../services';
 import { supabase } from '../lib/supabase';
 
 export const Settings: React.FC = () => {
   const { userProfile, currentUser, refreshProfile, resetPassword, logout } = useAuth();
-  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
   // Profile Form States
@@ -354,58 +352,7 @@ export const Settings: React.FC = () => {
           </form>
         </section>
 
-        {/* SECTION 2: Appearance */}
-        <section className="bg-white border border-[#D8CFBF] rounded-[20px] p-6 md:p-8 shadow-sm flex flex-col gap-6">
-          <div className="border-b border-[#E7E1D6] pb-4">
-            <h3 className="font-title-lg text-title-lg font-bold text-primary flex items-center gap-2">
-              <span className="material-symbols-outlined text-xl text-[#8C7A5B]">palette</span>
-              Appearance
-            </h3>
-            <p className="text-xs text-on-surface-variant mt-1">
-              Customize how LevelUp looks and feels on your desktop.
-            </p>
-          </div>
-
-          {/* Theme Segmented Control */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h4 className="text-base font-bold text-[#2C2825]">Interface Theme</h4>
-              <p className="text-xs text-[#8C8275] mt-0.5">
-                Select your preferred color mode for the workspace.
-              </p>
-            </div>
-
-            {/* Light / Dark Segmented Control */}
-            <div className="p-1.5 bg-[#F8F5EE] border border-[#D8CFBF] rounded-xl flex items-center gap-1 self-start sm:self-auto">
-              <button
-                type="button"
-                onClick={() => setTheme('light')}
-                className={`px-5 py-2 rounded-lg font-bold text-xs transition-all cursor-pointer flex items-center gap-1.5 ${
-                  theme === 'light'
-                    ? 'bg-white text-[#2C2825] shadow-sm border border-[#E7E1D6]'
-                    : 'text-[#8C8275] hover:text-[#2C2825]'
-                }`}
-              >
-                <span className="material-symbols-outlined text-sm">light_mode</span>
-                Light
-              </button>
-              <button
-                type="button"
-                onClick={() => setTheme('dark')}
-                className={`px-5 py-2 rounded-lg font-bold text-xs transition-all cursor-pointer flex items-center gap-1.5 ${
-                  theme === 'dark'
-                    ? 'bg-white text-[#2C2825] shadow-sm border border-[#E7E1D6]'
-                    : 'text-[#8C8275] hover:text-[#2C2825]'
-                }`}
-              >
-                <span className="material-symbols-outlined text-sm">dark_mode</span>
-                Dark
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 3: Security */}
+        {/* SECTION 2: Security */}
         <section className="bg-white border border-[#D8CFBF] rounded-[20px] p-6 md:p-8 shadow-sm flex flex-col gap-6">
           <div className="border-b border-[#E7E1D6] pb-4">
             <h3 className="font-title-lg text-title-lg font-bold text-primary flex items-center gap-2">
@@ -449,7 +396,7 @@ export const Settings: React.FC = () => {
           </div>
         </section>
 
-        {/* SECTION 4: Account */}
+        {/* SECTION 3: Account Management */}
         <section className="bg-white border border-[#D8CFBF] rounded-[20px] p-6 md:p-8 shadow-sm flex flex-col gap-6 mb-8">
           <div className="border-b border-[#E7E1D6] pb-4">
             <h3 className="font-title-lg text-title-lg font-bold text-primary flex items-center gap-2">

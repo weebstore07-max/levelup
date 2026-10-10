@@ -7,3 +7,6 @@ dist/
 __MACOSX/
 scratch_*
 stitch_duplicate_of_levelup_gamified_learning_portal/
+playwright-report/
+test-results/
+

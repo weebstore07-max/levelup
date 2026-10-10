@@ -414,7 +414,7 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-surface-container-lowest card-border rounded-xl p-card-padding flex flex-col justify-between hover:bg-[#F2EEE5] dark:hover:bg-[#2C2823] transition-colors flex-1 min-w-[220px]">
+        <div className="bg-surface-container-lowest card-border rounded-xl p-card-padding flex flex-col justify-between hover:bg-[#F2EEE5] transition-colors flex-1 min-w-[220px]">
           <div className="flex justify-between items-start w-full">
             <div>
               <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Streak</p>
@@ -431,9 +431,9 @@ export const Dashboard: React.FC = () => {
               <span className="text-sm">❄️</span>
               <span className="font-medium truncate text-on-surface-variant">
                 {freezePassActivated ? (
-                  <span className="text-amber-700 dark:text-amber-400 font-bold">Activated</span>
+                  <span className="text-amber-700 font-bold">Activated</span>
                 ) : hasPassAvailable && !isMonthlyLimitReached ? (
-                  <span className="text-blue-600 dark:text-blue-400 font-bold">1 Available</span>
+                  <span className="text-blue-600 font-bold">1 Available</span>
                 ) : isMonthlyLimitReached ? (
                   <span className="text-on-surface-variant font-medium">Used This Month</span>
                 ) : lastFrozenDate ? (

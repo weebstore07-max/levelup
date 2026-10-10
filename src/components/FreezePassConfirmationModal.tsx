@@ -17,11 +17,11 @@ export const FreezePassConfirmationModal: React.FC<FreezePassConfirmationModalPr
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fadeIn">
-      <div className="bg-white dark:bg-[#211E1A] border border-[#D8CFBF] dark:border-[#3A342C] rounded-[20px] p-6 md:p-8 max-w-md w-full shadow-xl flex flex-col gap-6 text-[#2C2825] dark:text-[#F0EBE1] relative">
+      <div className="bg-white border border-[#D8CFBF] rounded-[20px] p-6 md:p-8 max-w-md w-full shadow-xl flex flex-col gap-6 text-[#2C2825] relative">
         
         {/* Header & Icon */}
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center flex-shrink-0 text-2xl">
+          <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center flex-shrink-0 text-2xl">
             ❄️
           </div>
           <div>
@@ -31,19 +31,19 @@ export const FreezePassConfirmationModal: React.FC<FreezePassConfirmationModalPr
             <p className="text-xs text-on-surface-variant mt-1.5 leading-relaxed">
               Your Freeze Pass will protect your next qualifying missed study day.
             </p>
-            <p className="text-[11px] text-[#8C8275] dark:text-[#A39B8E] mt-2 font-medium">
+            <p className="text-[11px] text-[#8C8275] mt-2 font-medium">
               You can use only one Freeze Pass per calendar month.
             </p>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E7E1D6] dark:border-[#3A342C]">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E7E1D6]">
           <button
             type="button"
             onClick={onClose}
             disabled={isActivating}
-            className="py-2.5 px-4 rounded-xl border border-outline-variant font-bold text-xs hover:bg-surface-container-high transition-colors cursor-pointer text-[#2C2825] dark:text-[#F0EBE1] disabled:opacity-50"
+            className="py-2.5 px-4 rounded-xl border border-outline-variant font-bold text-xs hover:bg-surface-container-high transition-colors cursor-pointer text-[#2C2825] disabled:opacity-50"
           >
             Cancel
           </button>
@@ -51,7 +51,7 @@ export const FreezePassConfirmationModal: React.FC<FreezePassConfirmationModalPr
             type="button"
             onClick={onConfirm}
             disabled={isActivating}
-            className="py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-bold text-xs transition-colors cursor-pointer flex items-center gap-2 disabled:opacity-50"
+            className="py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-colors cursor-pointer flex items-center gap-2 disabled:opacity-50"
           >
             {isActivating ? (
               <>
